@@ -21,34 +21,33 @@ public class ExtractionEngine {
         ArrayList<String> news = new ArrayList<>();
         try {
             String[] keywords = {"Canada", "University", "Dalhousie", "Halifax", "Canada Education", "Moncton", "hockey", "Fredericton", "celebration"};
-            for (int i=0;i<keywords.length;i++){
+            for (int i = 0; i < keywords.length; i++) {
                 String encodedKeyword = URLEncoder.encode(keywords[i], "UTF-8");
                 URL url = new URL("https://newsapi.org/v2/top-headlines?q=" + encodedKeyword + "&apiKey=5385abb6e1604fe4ad3b032a386d998f");
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
                 con.getResponseCode();
-                BufferedReader input = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                String inputString;
-                StringBuilder builder = new StringBuilder();
-                while ((inputString = input.readLine()) != null) {
-                    builder.append(inputString);
+                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuilder content = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
                 }
-                input.close();
+                in.close();
                 con.disconnect();
 
-                String str = "\"title\":\"(.*?)\".*?\"description\":\"(.*?)\"";
-                Pattern pattern = Pattern.compile(str, Pattern.DOTALL);
-                Matcher match = pattern.matcher(builder.toString());
+                String pattern = "\"title\":\"(.*?)\".*?\"description\":\"(.*?)\"";
+                Pattern r = Pattern.compile(pattern, Pattern.DOTALL);
+                Matcher m = r.matcher(content.toString());
 
-                do {
-                    String title = match.group(1);
-                    String content = match.group(2);
+                while (m.find()) {
+                    String title = m.group(1);
+                    String details = m.group(2);
 
-                    if (title.toLowerCase().contains(keywords[i].toLowerCase()) || content.toLowerCase().contains(keywords[i].toLowerCase())) {
-                        news.add("Title: " + title + "\nContent: " + content + "\n");
+                    if (title.toLowerCase().contains(keywords[i].toLowerCase()) || details.toLowerCase().contains(keywords[i].toLowerCase())) {
+                        news.add("Title: " + title + "\nContent: " + details + "\n");
                     }
-                } while (match.find());
-
+                }
             }
         } catch (IOException e) {
             System.out.println(e);
